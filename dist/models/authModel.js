@@ -33,7 +33,6 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-// src/models/authModel.ts
 const mongoose_1 = __importStar(require("mongoose"));
 const authSchema = new mongoose_1.Schema({
     fullName: { type: String, required: true },
