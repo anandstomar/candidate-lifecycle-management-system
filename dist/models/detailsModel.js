@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-// src/models/candidateModel.ts
 const mongoose_1 = require("mongoose");
 const EducationSchema = new mongoose_1.Schema({
     board10: { type: String, required: true },
