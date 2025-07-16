@@ -2,10 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const adminController_1 = require("../controllers/adminController");
+const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = (0, express_1.Router)();
-router.post('/', adminController_1.createAdminDashboard);
-router.get('/', adminController_1.getAdminDashboards);
-router.get('/:id', adminController_1.getAdminDashboardById);
-router.put('/:id', adminController_1.updateAdminDashboard);
-router.delete('/:id', adminController_1.deleteAdminDashboard);
+router.post('/', authMiddleware_1.authenticateUser, adminController_1.createAdminDashboard);
+router.get('/', authMiddleware_1.authenticateUser, adminController_1.getAdminDashboards);
+router.get('/:id', authMiddleware_1.authenticateUser, adminController_1.getAdminDashboardById);
+router.put('/:id', authMiddleware_1.authenticateUser, adminController_1.updateAdminDashboard);
+router.delete('/:id', authMiddleware_1.authenticateUser, adminController_1.deleteAdminDashboard);
 exports.default = router;
