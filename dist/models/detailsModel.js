@@ -7,6 +7,7 @@ const EducationSchema = new mongoose_1.Schema({
     board12: { type: String, required: true },
     percentage12: { type: Number, required: true, min: 0, max: 100 },
     collegeDegree: { type: String, required: true },
+    college: { type: String, required: true },
     branch: { type: String },
     passingYear: { type: Number, required: true },
     cgpa: { type: Number, required: true, min: 0, max: 10 },
