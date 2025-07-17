@@ -52,7 +52,8 @@ exports.getCandidateById = getCandidateById;
 const getMyCandidate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.userId;
-        const candidate = yield detailsModel_1.default.findById(userId);
+        console.log('Fetching candidate for userId:', userId);
+        const candidate = yield detailsModel_1.default.findOne({ userId });
         if (!candidate)
             return res.status(404).json({ message: 'Candidate not found' });
         res.json(candidate);
