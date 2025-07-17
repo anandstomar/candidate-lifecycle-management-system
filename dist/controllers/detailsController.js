@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteCandidate = exports.updateCandidate = exports.getMyCandidate = exports.getCandidateById = exports.getCandidates = exports.createCandidate = void 0;
+exports.getCandidateUserId = exports.getMyCandidate = exports.deleteCandidate = exports.updateCandidate = exports.getCandidateById = exports.getCandidates = exports.createCandidate = void 0;
 const detailsModel_1 = __importDefault(require("../models/detailsModel"));
 const createCandidate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -49,20 +49,6 @@ const getCandidateById = (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.getCandidateById = getCandidateById;
-const getMyCandidate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const userId = req.userId;
-        console.log('Fetching candidate for userId:', userId);
-        const candidate = yield detailsModel_1.default.findOne({ userId });
-        if (!candidate)
-            return res.status(404).json({ message: 'Candidate not found' });
-        res.json(candidate);
-    }
-    catch (error) {
-        res.status(500).json({ message: 'Error fetching candidate profile', error: error.message });
-    }
-});
-exports.getMyCandidate = getMyCandidate;
 const updateCandidate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
@@ -90,3 +76,32 @@ const deleteCandidate = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.deleteCandidate = deleteCandidate;
+const getMyCandidate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.userId;
+        console.log('Fetching candidate for userId:', userId);
+        const candidate = yield detailsModel_1.default.findOne({ userId });
+        if (!candidate)
+            return res.status(404).json({ message: 'Candidate not found' });
+        res.json(candidate);
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Error fetching candidate profile', error: error.message });
+    }
+});
+exports.getMyCandidate = getMyCandidate;
+const getCandidateUserId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.userId;
+        console.log('User ID from request:', userId);
+        if (!userId) {
+            return res.status(401).json({ message: 'User ID not found in request. Authentication middleware might be missing or failed.' });
+        }
+        res.status(200).json({ userId });
+    }
+    catch (error) {
+        console.error('Error in getCandidateUserId:', error);
+        res.status(500).json({ message: 'Failed to retrieve userId', error: error.message });
+    }
+});
+exports.getCandidateUserId = getCandidateUserId;

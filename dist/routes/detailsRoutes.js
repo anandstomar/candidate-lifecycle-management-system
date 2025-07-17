@@ -5,6 +5,7 @@ const detailsController_1 = require("../controllers/detailsController");
 const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = (0, express_1.Router)();
 router.get('/me', authMiddleware_1.authenticateUser, detailsController_1.getMyCandidate);
+router.get('/user-id', authMiddleware_1.authenticateUser, detailsController_1.getCandidateUserId);
 router.post('/', authMiddleware_1.authenticateUser, detailsController_1.createCandidate);
 router.get('/', authMiddleware_1.authenticateUser, detailsController_1.getCandidates);
 router.get('/:id', authMiddleware_1.authenticateUser, detailsController_1.getCandidateById);
