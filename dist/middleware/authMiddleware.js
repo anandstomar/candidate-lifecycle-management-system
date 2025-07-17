@@ -20,12 +20,16 @@ const authenticateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, f
     try {
         const authHeader = req.headers.authorization || '';
         const token = authHeader.split(' ')[1];
-        if (!token)
+        if (!token) {
             return res.status(401).json({ message: 'No token, authorization denied' });
+        }
         const decoded = jsonwebtoken_1.default.verify(token, JWT_SECRET);
-        req.user = yield authModel_1.default.findById(decoded.id).select('-password');
-        if (!req.user)
+        req.userId = decoded.id;
+        const user = yield authModel_1.default.findById(decoded.id).select('-password');
+        if (!user) {
             return res.status(401).json({ message: 'Invalid token' });
+        }
+        req.user = user;
         next();
     }
     catch (err) {

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteCandidate = exports.updateCandidate = exports.getCandidateById = exports.getCandidates = exports.createCandidate = void 0;
+exports.deleteCandidate = exports.updateCandidate = exports.getMyCandidate = exports.getCandidateById = exports.getCandidates = exports.createCandidate = void 0;
 const detailsModel_1 = __importDefault(require("../models/detailsModel"));
 const createCandidate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -49,6 +49,19 @@ const getCandidateById = (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.getCandidateById = getCandidateById;
+const getMyCandidate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.userId;
+        const candidate = yield detailsModel_1.default.findById(userId);
+        if (!candidate)
+            return res.status(404).json({ message: 'Candidate not found' });
+        res.json(candidate);
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Error fetching candidate profile', error: error.message });
+    }
+});
+exports.getMyCandidate = getMyCandidate;
 const updateCandidate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
