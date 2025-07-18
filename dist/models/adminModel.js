@@ -22,10 +22,15 @@ const AdminDashboardSchema = new mongoose_1.Schema({
         required: true,
         ref: 'Question',
     },
-    resumeStatus: {
+    status: {
         type: String,
-        enum: ['Pending', 'Approved', 'Rejected'],
-        default: 'Pending',
+        enum: ['Active', 'Inactive'],
+        default: 'Active',
+    },
+    experience: {
+        type: Number,
+        required: true,
+        min: 0,
     },
     profileCompletion: {
         type: Number,
@@ -33,10 +38,20 @@ const AdminDashboardSchema = new mongoose_1.Schema({
         min: 0,
         max: 100,
     },
+    resumeStatus: {
+        type: String,
+        enum: ['Created', 'Not Created'],
+        default: 'Not Created',
+    },
     paymentStatus: {
         type: String,
         enum: ['Paid', 'Pending', 'Failed'],
         default: 'Pending',
+    },
+    hired: {
+        type: String,
+        enum: ['Yes', 'No'],
+        default: 'No',
     },
 }, {
     timestamps: true,

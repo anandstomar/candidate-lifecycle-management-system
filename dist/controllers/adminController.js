@@ -13,11 +13,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteAdminDashboard = exports.updateAdminDashboard = exports.getAdminDashboardById = exports.getAdminDashboards = exports.createAdminDashboard = void 0;
-const adminModel_1 = __importDefault(require("../models/adminModel"));
 const mongoose_1 = __importDefault(require("mongoose"));
+const adminModel_1 = __importDefault(require("../models/adminModel"));
 const createAdminDashboard = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const data = req.body;
+        if (data.desirableJob && !mongoose_1.default.Types.ObjectId.isValid(data.desirableJob.toString())) {
+            return res.status(400).json({ message: 'Invalid desirableJob ID' });
+        }
+        if (data.testScore && !mongoose_1.default.Types.ObjectId.isValid(data.testScore.toString())) {
+            return res.status(400).json({ message: 'Invalid testScore ID' });
+        }
         const dashboard = new adminModel_1.default(data);
         yield dashboard.save();
         res.status(201).json({ message: 'Admin dashboard entry created', dashboard });
@@ -43,7 +49,6 @@ exports.getAdminDashboards = getAdminDashboards;
 const getAdminDashboardById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        console.log(`Fetching dashboard entry with ID: ${id}`);
         if (!mongoose_1.default.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ message: 'Invalid ID format' });
         }
@@ -64,6 +69,18 @@ const updateAdminDashboard = (req, res) => __awaiter(void 0, void 0, void 0, fun
     try {
         const { id } = req.params;
         const updates = req.body;
+        if (updates.status && !['Active', 'Inactive'].includes(updates.status)) {
+            return res.status(400).json({ message: 'Invalid status value' });
+        }
+        if (updates.resumeStatus && !['Created', 'Not Created'].includes(updates.resumeStatus)) {
+            return res.status(400).json({ message: 'Invalid resumeStatus value' });
+        }
+        if (updates.paymentStatus && !['Paid', 'Pending', 'Failed'].includes(updates.paymentStatus)) {
+            return res.status(400).json({ message: 'Invalid paymentStatus value' });
+        }
+        if (updates.hired && !['Yes', 'No'].includes(updates.hired)) {
+            return res.status(400).json({ message: 'Invalid hired value' });
+        }
         const dashboard = yield adminModel_1.default.findByIdAndUpdate(id, updates, {
             new: true,
             runValidators: true,
@@ -80,6 +97,9 @@ exports.updateAdminDashboard = updateAdminDashboard;
 const deleteAdminDashboard = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
+        if (!mongoose_1.default.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: 'Invalid ID format' });
+        }
         const dashboard = yield adminModel_1.default.findByIdAndDelete(id);
         if (!dashboard)
             return res.status(404).json({ message: 'Dashboard entry not found' });
