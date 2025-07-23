@@ -12,16 +12,21 @@ const EducationSchema = new mongoose_1.Schema({
     board12: { type: String, required: true },
     percentage12: { type: Number, required: true, min: 0, max: 100 },
 }, { _id: false });
+const ExperienceSchema = new mongoose_1.Schema({
+    companyName: { type: String, required: true },
+    role: { type: String, required: true },
+    years: { type: Number, required: true, min: 0 },
+}, { _id: false });
 const CandidateSchema = new mongoose_1.Schema({
     userId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
     fullName: { type: String, required: true },
     email: { type: String, required: true },
     dob: { type: Date, required: true },
-    phone: { type: String, required: true, unique: true },
+    contact: { type: String, required: true, unique: true },
     education: { type: [EducationSchema], required: true },
     skills: { type: [String], required: true },
-    experience: { type: Number, required: true, min: 0 },
-    desirableJob: { type: String, required: true },
+    experience: { type: [ExperienceSchema] },
+    desirableJob: { type: [String], required: true },
 }, {
     timestamps: true,
 });

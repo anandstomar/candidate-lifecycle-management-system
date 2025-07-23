@@ -92,6 +92,7 @@ const getMyCandidate = (req, res) => __awaiter(void 0, void 0, void 0, function*
 exports.getMyCandidate = getMyCandidate;
 const getCandidateUserId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        console.log(req.userId, 'User ID from request');
         const userId = req.userId;
         console.log('User ID from request:', userId);
         if (!userId) {
