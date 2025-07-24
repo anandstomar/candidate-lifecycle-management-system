@@ -23,6 +23,7 @@ const CandidateSchema = new mongoose_1.Schema({
     email: { type: String, required: true },
     dob: { type: Date, required: true },
     contact: { type: String, required: true, unique: true },
+    address: { type: String, required: true },
     education: { type: [EducationSchema], required: true },
     skills: { type: [String], required: true },
     experience: { type: [ExperienceSchema] },
