@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.authenticateUser = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const authModel_1 = __importDefault(require("../models/authModel"));
+const adminModel_1 = __importDefault(require("../models/adminModel"));
 const JWT_SECRET = process.env.JWT_SECRET || 'JobPortalUsers';
 const authenticateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -30,6 +31,7 @@ const authenticateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, f
             return res.status(401).json({ message: 'Invalid token' });
         }
         req.user = user;
+        yield adminModel_1.default.findOneAndUpdate({ userId: decoded.id }, { status: 'Active' });
         next();
     }
     catch (err) {

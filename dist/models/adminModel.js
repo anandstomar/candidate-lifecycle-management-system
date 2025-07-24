@@ -2,13 +2,19 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
 const AdminDashboardSchema = new mongoose_1.Schema({
-    name: {
-        type: String,
+    userId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+        unique: true,
+    },
+    fullName: {
+        type: mongoose_1.Schema.Types.ObjectId,
         required: true,
         ref: 'User',
     },
     email: {
-        type: String,
+        type: mongoose_1.Schema.Types.ObjectId,
         required: true,
         ref: 'User',
     },
@@ -28,13 +34,14 @@ const AdminDashboardSchema = new mongoose_1.Schema({
         default: 'Active',
     },
     experience: {
-        type: Number,
+        type: mongoose_1.Schema.Types.ObjectId,
         required: true,
-        min: 0,
+        ref: 'Candidate',
     },
     profileCompletion: {
-        type: Number,
+        type: mongoose_1.Schema.Types.ObjectId,
         required: true,
+        ref: 'Candidate',
         min: 0,
         max: 100,
     },
@@ -53,7 +60,5 @@ const AdminDashboardSchema = new mongoose_1.Schema({
         enum: ['Yes', 'No'],
         default: 'No',
     },
-}, {
-    timestamps: true,
-});
+}, { timestamps: true });
 exports.default = (0, mongoose_1.model)('AdminDashboard', AdminDashboardSchema, 'AdminDashboard');

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteAdminDashboard = exports.updateAdminDashboard = exports.getAdminDashboardById = exports.getAdminDashboards = exports.createAdminDashboard = void 0;
+exports.verifyPayment = exports.logout = exports.deleteAdminDashboard = exports.updateAdminDashboard = exports.getAdminDashboardById = exports.getAdminDashboards = exports.createAdminDashboard = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const adminModel_1 = __importDefault(require("../models/adminModel"));
 const createAdminDashboard = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -110,3 +110,42 @@ const deleteAdminDashboard = (req, res) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 exports.deleteAdminDashboard = deleteAdminDashboard;
+const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.userId;
+        yield adminModel_1.default.findOneAndUpdate({ userId }, { status: 'Inactive' });
+        res.json({ message: 'Logged out successfully' });
+    }
+    catch (err) {
+        res.status(500).json({ message: 'Logout failed', error: err.message });
+    }
+});
+exports.logout = logout;
+const razorpay_utils_1 = require("razorpay/dist/utils/razorpay-utils");
+const verifyPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    const secret = process.env.RAZORPAY_KEY_SECRET;
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+        return res.status(400).json({ error: 'Missing required verification fields' });
+    }
+    try {
+        const isValid = (0, razorpay_utils_1.validatePaymentVerification)({ order_id: razorpay_order_id, payment_id: razorpay_payment_id }, razorpay_signature, secret);
+        if (!isValid) {
+            return res.status(400).json({ error: 'Invalid signature' });
+        }
+        const userId = req.userId;
+        const updated = yield adminModel_1.default.findOneAndUpdate({ userId }, { paymentStatus: 'Paid' }, { new: true });
+        if (!updated) {
+            return res.status(404).json({ error: 'Dashboard entry not found for this user' });
+        }
+        return res.status(200).json({
+            message: 'Payment verified and status updated',
+            dashboard: updated
+        });
+    }
+    catch (err) {
+        console.error('❌ /verify-payment error:', err);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+exports.verifyPayment = verifyPayment;
