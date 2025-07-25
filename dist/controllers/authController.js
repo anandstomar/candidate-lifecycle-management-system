@@ -16,6 +16,7 @@ exports.login = exports.register = void 0;
 const bcryptjs_1 = require("bcryptjs");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const authModel_1 = __importDefault(require("../models/authModel"));
+const adminModel_1 = __importDefault(require("../models/adminModel"));
 const JWT_SECRET = process.env.JWT_SECRET || 'JobPortalUsers';
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { fullName, email, password, confirmPassword } = req.body;
@@ -50,10 +51,11 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         if (!isMatch)
             return res.status(400).json({ message: 'Invalid credentials' });
         const token = jsonwebtoken_1.default.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1d' });
+        yield adminModel_1.default.findOneAndUpdate({ userId: user._id }, { status: 'Active' }, { upsert: true, setDefaultsOnInsert: true });
         res.status(200).json({
             message: 'Login successful',
-            user: { id: user.id, fullName: user.fullName, email: user.email },
             token,
+            user: { id: user._id, fullName: user.fullName, email: user.email },
         });
     }
     catch (err) {
