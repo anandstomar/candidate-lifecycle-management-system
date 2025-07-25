@@ -13,66 +13,96 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteQuestion = exports.updateQuestion = exports.getQuestionById = exports.getQuestions = exports.createQuestion = void 0;
+const mongoose_1 = __importDefault(require("mongoose"));
 const testModel_1 = __importDefault(require("../models/testModel"));
 const createQuestion = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const userId = req.userId;
+        const existing = yield testModel_1.default.findOne({ userId });
+        if (existing) {
+            return res.status(400).json({ message: 'You have already created a question' });
+        }
         const data = req.body;
-        const question = new testModel_1.default(data);
+        const question = new testModel_1.default(Object.assign({ userId }, data));
         yield question.save();
         res.status(201).json({ message: 'Question created', question });
     }
-    catch (error) {
-        res.status(500).json({ message: 'Error creating question', error: error.message });
+    catch (err) {
+        res.status(500).json({ message: 'Error creating question', error: err.message });
     }
 });
 exports.createQuestion = createQuestion;
 const getQuestions = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const questions = yield testModel_1.default.find();
+        const questions = yield testModel_1.default.find()
+            .populate('userId', 'fullName email')
+            .exec();
         res.json({ count: questions.length, questions });
     }
-    catch (error) {
-        res.status(500).json({ message: 'Error fetching questions', error: error.message });
+    catch (err) {
+        res.status(500).json({ message: 'Error fetching questions', error: err.message });
     }
 });
 exports.getQuestions = getQuestions;
 const getQuestionById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const question = yield testModel_1.default.findById(id);
-        if (!question)
+        if (!mongoose_1.default.isValidObjectId(id)) {
+            return res.status(400).json({ message: 'Invalid question ID' });
+        }
+        const question = yield testModel_1.default.findById(id)
+            .populate('userId', 'fullName email')
+            .exec();
+        if (!question) {
             return res.status(404).json({ message: 'Question not found' });
+        }
         res.json(question);
     }
-    catch (error) {
-        res.status(500).json({ message: 'Error fetching question', error: error.message });
+    catch (err) {
+        res.status(500).json({ message: 'Error fetching question', error: err.message });
     }
 });
 exports.getQuestionById = getQuestionById;
 const updateQuestion = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
+        if (!mongoose_1.default.isValidObjectId(id)) {
+            return res.status(400).json({ message: 'Invalid question ID' });
+        }
+        const existing = yield testModel_1.default.findOne({ _id: id, userId: req.userId });
+        if (!existing) {
+            return res.status(403).json({ message: 'Not authorized to update this question' });
+        }
         const updates = req.body;
-        const question = yield testModel_1.default.findByIdAndUpdate(id, updates, { new: true, runValidators: true });
-        if (!question)
+        const question = yield testModel_1.default.findByIdAndUpdate(id, updates, {
+            new: true,
+            runValidators: true,
+        });
+        if (!question) {
             return res.status(404).json({ message: 'Question not found' });
+        }
         res.json({ message: 'Question updated', question });
     }
-    catch (error) {
-        res.status(500).json({ message: 'Error updating question', error: error.message });
+    catch (err) {
+        res.status(500).json({ message: 'Error updating question', error: err.message });
     }
 });
 exports.updateQuestion = updateQuestion;
 const deleteQuestion = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const question = yield testModel_1.default.findByIdAndDelete(id);
-        if (!question)
-            return res.status(404).json({ message: 'Question not found' });
+        if (!mongoose_1.default.isValidObjectId(id)) {
+            return res.status(400).json({ message: 'Invalid question ID' });
+        }
+        const existing = yield testModel_1.default.findOne({ _id: id, userId: req.userId });
+        if (!existing) {
+            return res.status(403).json({ message: 'Not authorized to delete this question' });
+        }
+        yield testModel_1.default.findByIdAndDelete(id);
         res.json({ message: 'Question deleted' });
     }
-    catch (error) {
-        res.status(500).json({ message: 'Error deleting question', error: error.message });
+    catch (err) {
+        res.status(500).json({ message: 'Error deleting question', error: err.message });
     }
 });
 exports.deleteQuestion = deleteQuestion;

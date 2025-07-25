@@ -37,6 +37,26 @@ const mongoose_1 = __importStar(require("mongoose"));
 const authSchema = new mongoose_1.Schema({
     fullName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true }
-});
+    password: { type: String, required: true },
+    status: {
+        type: String,
+        enum: ['Active', 'Inactive'],
+        default: 'Active',
+    },
+    resumeStatus: {
+        type: String,
+        enum: ['Created', 'Not Created'],
+        default: 'Not Created',
+    },
+    paymentStatus: {
+        type: String,
+        enum: ['Paid', 'Pending', 'Failed'],
+        default: 'Pending',
+    },
+    hired: {
+        type: String,
+        enum: ['Yes', 'No'],
+        default: 'No',
+    },
+}, { timestamps: true });
 exports.default = mongoose_1.default.model('User', authSchema, 'User');

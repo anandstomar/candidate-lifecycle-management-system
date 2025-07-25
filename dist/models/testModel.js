@@ -6,6 +6,7 @@ const OptionSchema = new mongoose_1.Schema({
     isCorrect: { type: Boolean, required: true },
 }, { _id: false });
 const QuestionSchema = new mongoose_1.Schema({
+    userId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
     title: { type: String, required: true },
     category: { type: String, required: true },
     difficulty: { type: String, enum: ['Easy', 'Medium', 'Hard'], required: true },

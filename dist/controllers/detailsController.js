@@ -14,14 +14,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCandidateUserId = exports.getMyCandidate = exports.deleteCandidate = exports.updateCandidate = exports.getCandidateById = exports.getCandidates = exports.createCandidate = void 0;
 const detailsModel_1 = __importDefault(require("../models/detailsModel"));
+const authModel_1 = __importDefault(require("../models/authModel"));
 const createCandidate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const candidateData = req.body;
+        const userId = req.userId;
+        const candidateData = Object.assign(Object.assign({}, req.body), { userId: userId });
+        const existingCandidate = yield detailsModel_1.default.findOne({ userId });
+        if (existingCandidate) {
+            return res.status(400).json({ message: 'Candidate profile already exists for this user.' });
+        }
         const candidate = new detailsModel_1.default(candidateData);
         yield candidate.save();
+        yield authModel_1.default.findByIdAndUpdate(userId, { resumeStatus: 'Created' }, { new: true });
         res.status(201).json({ message: 'Candidate created', candidate });
     }
     catch (error) {
+        console.error("Error creating candidate:", error);
         res.status(500).json({ message: 'Error creating candidate', error: error.message });
     }
 });

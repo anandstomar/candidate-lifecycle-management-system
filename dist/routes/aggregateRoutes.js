@@ -1,0 +1,9 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const aggregateController_1 = require("../controllers/aggregateController");
+const authMiddleware_1 = require("../middleware/authMiddleware");
+const router = (0, express_1.Router)();
+router.get('/aggregated-dashboard', authMiddleware_1.authenticateUser, aggregateController_1.getAggregatedDashboards);
+router.get('/aggregated-dashboard/my', authMiddleware_1.authenticateUser, aggregateController_1.getMyAggregatedDashboard);
+exports.default = router;
