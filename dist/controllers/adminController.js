@@ -39,8 +39,13 @@ exports.createAdminDashboard = createAdminDashboard;
 const getAdminDashboards = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const dashboards = yield adminModel_1.default.find()
-            .populate('desirableJob', 'fullName email desirableJob')
+            .populate('userId', 'fullName email')
+            .populate('fullName', 'fullName')
+            .populate('email', 'email')
+            .populate('desirableJob', 'desirableJob')
             .populate('testScore', 'title points')
+            .populate('experience', 'experience')
+            .populate('profileCompletion', 'profileCompletion')
             .exec();
         res.json({ count: dashboards.length, dashboards });
     }
@@ -56,11 +61,17 @@ const getAdminDashboardById = (req, res) => __awaiter(void 0, void 0, void 0, fu
             return res.status(400).json({ message: 'Invalid ID format' });
         }
         const dashboard = yield adminModel_1.default.findById(id)
-            .populate('desirableJob', 'fullName email desirableJob')
+            .populate('userId', 'fullName email')
+            .populate('fullName', 'fullName')
+            .populate('email', 'email')
+            .populate('desirableJob', 'desirableJob')
             .populate('testScore', 'title points')
+            .populate('experience', 'experience')
+            .populate('profileCompletion', 'profileCompletion')
             .exec();
-        if (!dashboard)
+        if (!dashboard) {
             return res.status(404).json({ message: 'Dashboard entry not found' });
+        }
         res.json(dashboard);
     }
     catch (error) {
@@ -68,6 +79,7 @@ const getAdminDashboardById = (req, res) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 exports.getAdminDashboardById = getAdminDashboardById;
+;
 const updateAdminDashboard = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
