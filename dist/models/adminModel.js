@@ -8,20 +8,11 @@ const AdminDashboardSchema = new mongoose_1.Schema({
         required: true,
         unique: true,
     },
-    fullName: {
+    candidateId: {
         type: mongoose_1.Schema.Types.ObjectId,
-        required: true,
-        ref: 'User',
-    },
-    email: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        required: true,
-        ref: 'User',
-    },
-    desirableJob: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        required: true,
         ref: 'Candidate',
+        required: true,
+        unique: true,
     },
     testScore: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -32,18 +23,6 @@ const AdminDashboardSchema = new mongoose_1.Schema({
         type: String,
         enum: ['Active', 'Inactive'],
         default: 'Active',
-    },
-    experience: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        required: true,
-        ref: 'Candidate',
-    },
-    profileCompletion: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        required: true,
-        ref: 'Candidate',
-        min: 0,
-        max: 100,
     },
     resumeStatus: {
         type: String,
