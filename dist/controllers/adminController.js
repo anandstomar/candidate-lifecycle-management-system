@@ -42,7 +42,7 @@ const getAdminDashboards = (_req, res) => __awaiter(void 0, void 0, void 0, func
             .populate('userId', 'fullName email')
             .populate('fullName', 'fullName')
             .populate('email', 'email')
-            .populate('desirableJob', 'desirableJob')
+            .populate('desirableJob', 'fullName email desirableJob')
             .populate('testScore', 'title points')
             .populate('experience', 'experience')
             .populate('profileCompletion', 'profileCompletion')
