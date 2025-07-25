@@ -12,8 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyPayment = exports.logout = exports.deleteAdminDashboard = exports.updateAdminDashboard = exports.getAdminDashboardById = exports.getAdminDashboards = exports.createAdminDashboard = void 0;
+exports.verifyPayment = exports.makePayment = exports.logout = exports.deleteAdminDashboard = exports.updateAdminDashboard = exports.getAdminDashboardById = exports.getAdminDashboards = exports.createAdminDashboard = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
+const razorpay_1 = __importDefault(require("razorpay"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const adminModel_1 = __importDefault(require("../models/adminModel"));
 const createAdminDashboard = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -121,6 +124,33 @@ const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.logout = logout;
+const razorpay = new razorpay_1.default({
+    key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_PBUluwX3e15zwd',
+    key_secret: process.env.RAZORPAY_KEY_SECRET || 'v1Ukx0iR5Tid2ABmFh6m6Uowx',
+});
+const makePayment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { amount, currency = 'INR', receipt } = req.body;
+    if (amount == null || isNaN(amount)) {
+        return res.status(400).json({ error: 'Invalid or missing amount' });
+    }
+    try {
+        const options = {
+            amount: Math.round(amount * 100),
+            currency,
+            receipt: receipt !== null && receipt !== void 0 ? receipt : `rcpt_${Date.now()}`,
+            payment_capture: true,
+        };
+        console.log('💳 Creating Razorpay order with options:', options);
+        const order = yield razorpay.orders.create(options);
+        console.log('✅ Razorpay order created:', order);
+        res.status(200).json(order);
+    }
+    catch (err) {
+        console.error('❌ /make-payment error:', err);
+        res.status(500).json(Object.assign(Object.assign({ error: err.message }, (err.code && { code: err.code })), (err.description && { description: err.description })));
+    }
+});
+exports.makePayment = makePayment;
 const razorpay_utils_1 = require("razorpay/dist/utils/razorpay-utils");
 const verifyPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;

@@ -10,5 +10,6 @@ router.get('/:id', authMiddleware_1.authenticateUser, adminController_1.getAdmin
 router.put('/:id', authMiddleware_1.authenticateUser, adminController_1.updateAdminDashboard);
 router.delete('/:id', authMiddleware_1.authenticateUser, adminController_1.deleteAdminDashboard);
 router.post('/logout', authMiddleware_1.authenticateUser, adminController_1.logout);
+router.post('/make-payment', authMiddleware_1.authenticateUser, adminController_1.makePayment);
 router.post('/verify-payment', authMiddleware_1.authenticateUser, adminController_1.verifyPayment);
 exports.default = router;
