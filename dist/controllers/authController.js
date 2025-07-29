@@ -91,7 +91,7 @@ exports.login = login;
 const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.userId;
-        yield authModel_1.default.findOneAndUpdate({ userId }, { status: 'Inactive' });
+        yield authModel_1.default.findByIdAndUpdate({ userId }, { status: 'Inactive' });
         res.json({ message: 'Logged out successfully' });
     }
     catch (err) {
@@ -139,7 +139,7 @@ const verifyPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             return res.status(400).json({ error: 'Invalid signature' });
         }
         const userId = req.userId;
-        const updated = yield authModel_1.default.findOneAndUpdate({ userId }, { paymentStatus: 'Paid' }, { new: true });
+        const updated = yield authModel_1.default.findByIdAndUpdate({ userId }, { paymentStatus: 'Paid' }, { new: true });
         if (!updated) {
             return res.status(404).json({ error: 'Dashboard entry not found for this user' });
         }

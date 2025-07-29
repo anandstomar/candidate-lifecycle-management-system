@@ -49,7 +49,7 @@ const getCandidateById = (req, res) => __awaiter(void 0, void 0, void 0, functio
         const { id } = req.params;
         const candidate = yield detailsModel_1.default.findById(id);
         if (!candidate)
-            return res.status(404).json({ message: 'Candidate not found' });
+            return res.status(404).json({ message: 'Profile not found. Please create a profile first.' });
         res.json(candidate);
     }
     catch (error) {
@@ -100,9 +100,7 @@ const getMyCandidate = (req, res) => __awaiter(void 0, void 0, void 0, function*
 exports.getMyCandidate = getMyCandidate;
 const getCandidateUserId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log(req.userId, 'User ID from request');
         const userId = req.userId;
-        console.log('User ID from request:', userId);
         if (!userId) {
             return res.status(401).json({ message: 'User ID not found in request. Authentication middleware might be missing or failed.' });
         }
