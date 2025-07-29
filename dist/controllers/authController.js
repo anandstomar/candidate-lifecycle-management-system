@@ -129,7 +129,7 @@ exports.makePayment = makePayment;
 const razorpay_utils_1 = require("razorpay/dist/utils/razorpay-utils");
 const verifyPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-    const secret = process.env.RAZORPAY_KEY_SECRET;
+    const secret = process.env.RAZORPAY_KEY_SECRET || 'v1Ukx0iR5Tid2ABmFh6m6Uowx';
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
         return res.status(400).json({ error: 'Missing required verification fields' });
     }
