@@ -101,7 +101,7 @@ const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.logout = logout;
 const razorpay = new razorpay_1.default({
     key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_PBUluwX3e15zwd',
-    key_secret: process.env.RAZORPAY_KEY_SECRET || 'v1Ukx0iR5Tid2ABmFh6m6Uowx',
+    key_secret: process.env.RAZORPAY_KEY_SECRET || '1Ukx0iR5Tid2ABmFh6m6Uowx',
 });
 const makePayment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { amount, currency = 'INR', receipt } = req.body;
@@ -129,7 +129,7 @@ exports.makePayment = makePayment;
 const razorpay_utils_1 = require("razorpay/dist/utils/razorpay-utils");
 const verifyPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-    const secret = process.env.RAZORPAY_KEY_SECRET || 'v1Ukx0iR5Tid2ABmFh6m6Uowx';
+    const secret = process.env.RAZORPAY_KEY_SECRET || '1Ukx0iR5Tid2ABmFh6m6Uowx';
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
         return res.status(400).json({ error: 'Missing required verification fields' });
     }
