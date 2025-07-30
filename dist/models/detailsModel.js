@@ -29,6 +29,8 @@ const CandidateSchema = new mongoose_1.Schema({
     experience: { type: [ExperienceSchema] },
     desirableJob: { type: [String], required: true },
     profileCompletion: { type: Number, required: true, min: 0, max: 100 },
+    profileImage: { type: String, required: true },
+    resume: { type: String, required: true },
 }, {
     timestamps: true,
 });

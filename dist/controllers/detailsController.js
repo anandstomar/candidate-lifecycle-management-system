@@ -14,23 +14,70 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCandidateUserId = exports.getMyCandidate = exports.deleteCandidate = exports.updateCandidate = exports.getCandidateById = exports.getCandidates = exports.createCandidate = void 0;
 const detailsModel_1 = __importDefault(require("../models/detailsModel"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const authModel_1 = __importDefault(require("../models/authModel"));
+const safeParse = (value, fieldName, res) => {
+    try {
+        return JSON.parse(value);
+    }
+    catch (err) {
+        res.status(400).json({ message: `Invalid JSON for ${fieldName}` });
+        return null;
+    }
+};
 const createCandidate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const userId = req.userId;
-        const candidateData = Object.assign(Object.assign({}, req.body), { userId: userId });
-        const existingCandidate = yield detailsModel_1.default.findOne({ userId });
-        if (existingCandidate) {
-            return res.status(400).json({ message: 'Candidate profile already exists for this user.' });
+        const userIdStr = req.userId;
+        const userId = new mongoose_1.default.Types.ObjectId(userIdStr);
+        if (yield detailsModel_1.default.findOne({ userId })) {
+            return res.status(400).json({ message: 'Candidate profile already exists.' });
         }
+        const files = req.files;
+        if (!files.profileImage || !files.resume) {
+            return res.status(400).json({ message: 'Profile image and resume are required.' });
+        }
+        const data = req.body;
+        const requiredFields = ['education', 'skills', 'experience', 'desirableJob'];
+        for (const field of requiredFields) {
+            if (!data[field]) {
+                return res.status(400).json({ message: `Missing field: ${field}` });
+            }
+        }
+        const education = safeParse(data.education, 'education', res);
+        if (!education)
+            return;
+        const skills = safeParse(data.skills, 'skills', res);
+        if (!skills)
+            return;
+        const experience = safeParse(data.experience, 'experience', res);
+        if (!experience)
+            return;
+        const desirableJob = safeParse(data.desirableJob, 'desirableJob', res);
+        if (!desirableJob)
+            return;
+        const candidateData = {
+            userId,
+            fullName: data.fullName,
+            email: data.email,
+            dob: new Date(data.dob),
+            contact: data.contact,
+            address: data.address,
+            education,
+            skills,
+            experience,
+            desirableJob,
+            profileCompletion: Number(data.profileCompletion) || 0,
+            profileImage: files.profileImage[0].path,
+            resume: files.resume[0].path,
+        };
         const candidate = new detailsModel_1.default(candidateData);
-        yield candidate.save();
-        yield authModel_1.default.findByIdAndUpdate(userId, { resumeStatus: 'Created' }, { new: true });
-        res.status(201).json({ message: 'Candidate created', candidate });
+        const saved = yield candidate.save();
+        yield authModel_1.default.findByIdAndUpdate(userId, { resumeStatus: 'Created' });
+        res.status(201).json({ message: 'Candidate created', candidate: saved });
     }
-    catch (error) {
-        console.error("Error creating candidate:", error);
-        res.status(500).json({ message: 'Error creating candidate', error: error.message });
+    catch (err) {
+        console.error('Error creating candidate:', err);
+        res.status(500).json({ message: 'Error creating candidate', error: err.message });
     }
 });
 exports.createCandidate = createCandidate;
@@ -39,8 +86,8 @@ const getCandidates = (_req, res) => __awaiter(void 0, void 0, void 0, function*
         const candidates = yield detailsModel_1.default.find();
         res.json({ count: candidates.length, candidates });
     }
-    catch (error) {
-        res.status(500).json({ message: 'Error fetching candidates', error: error.message });
+    catch (err) {
+        res.status(500).json({ message: 'Error fetching candidates', error: err.message });
     }
 });
 exports.getCandidates = getCandidates;
@@ -49,25 +96,38 @@ const getCandidateById = (req, res) => __awaiter(void 0, void 0, void 0, functio
         const { id } = req.params;
         const candidate = yield detailsModel_1.default.findById(id);
         if (!candidate)
-            return res.status(404).json({ message: 'Profile not found. Please create a profile first.' });
+            return res.status(404).json({ message: 'Candidate not found.' });
         res.json(candidate);
     }
-    catch (error) {
-        res.status(500).json({ message: 'Error fetching candidate', error: error.message });
+    catch (err) {
+        res.status(500).json({ message: 'Error fetching candidate', error: err.message });
     }
 });
 exports.getCandidateById = getCandidateById;
 const updateCandidate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const updates = req.body;
+        const files = req.files;
+        const updates = Object.assign({}, req.body);
+        if (updates.education)
+            updates.education = JSON.parse(updates.education);
+        if (updates.skills)
+            updates.skills = JSON.parse(updates.skills);
+        if (updates.experience)
+            updates.experience = JSON.parse(updates.experience);
+        if (updates.desirableJob)
+            updates.desirableJob = JSON.parse(updates.desirableJob);
+        if (files.profileImage)
+            updates.profileImage = files.profileImage[0].path;
+        if (files.resume)
+            updates.resume = files.resume[0].path;
         const candidate = yield detailsModel_1.default.findByIdAndUpdate(id, updates, { new: true, runValidators: true });
         if (!candidate)
-            return res.status(404).json({ message: 'Candidate not found' });
+            return res.status(404).json({ message: 'Candidate not found.' });
         res.json({ message: 'Candidate updated', candidate });
     }
-    catch (error) {
-        res.status(500).json({ message: 'Error updating candidate', error: error.message });
+    catch (err) {
+        res.status(500).json({ message: 'Error updating candidate', error: err.message });
     }
 });
 exports.updateCandidate = updateCandidate;
@@ -76,39 +136,36 @@ const deleteCandidate = (req, res) => __awaiter(void 0, void 0, void 0, function
         const { id } = req.params;
         const candidate = yield detailsModel_1.default.findByIdAndDelete(id);
         if (!candidate)
-            return res.status(404).json({ message: 'Candidate not found' });
+            return res.status(404).json({ message: 'Candidate not found.' });
         res.json({ message: 'Candidate deleted' });
     }
-    catch (error) {
-        res.status(500).json({ message: 'Error deleting candidate', error: error.message });
+    catch (err) {
+        res.status(500).json({ message: 'Error deleting candidate', error: err.message });
     }
 });
 exports.deleteCandidate = deleteCandidate;
 const getMyCandidate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.userId;
-        console.log('Fetching candidate for userId:', userId);
         const candidate = yield detailsModel_1.default.findOne({ userId });
         if (!candidate)
-            return res.status(404).json({ message: 'Candidate not found' });
+            return res.status(404).json({ message: 'Candidate not found.' });
         res.json(candidate);
     }
-    catch (error) {
-        res.status(500).json({ message: 'Error fetching candidate profile', error: error.message });
+    catch (err) {
+        res.status(500).json({ message: 'Error fetching profile', error: err.message });
     }
 });
 exports.getMyCandidate = getMyCandidate;
 const getCandidateUserId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.userId;
-        if (!userId) {
-            return res.status(401).json({ message: 'User ID not found in request. Authentication middleware might be missing or failed.' });
-        }
-        res.status(200).json({ userId });
+        if (!userId)
+            return res.status(401).json({ message: 'Authentication required.' });
+        res.json({ userId });
     }
-    catch (error) {
-        console.error('Error in getCandidateUserId:', error);
-        res.status(500).json({ message: 'Failed to retrieve userId', error: error.message });
+    catch (err) {
+        res.status(500).json({ message: 'Failed to retrieve userId', error: err.message });
     }
 });
 exports.getCandidateUserId = getCandidateUserId;
